@@ -34,13 +34,44 @@ load_config
 
 set -- -d -z
 
-[ -n "${interface+x}" ] && { [ "$interface" == "all" ] && set -- "$@" "-a" || set -- "$@" "-i" "$interface"; }
-[ -n "${hostname+x}" ] && set -- "$@" "-h" "$hostname" "-e" "$hostname"
+# ----------------- 多值参数解析 -------------------
+
+# 解析 interface (支持 all 或 逗号分隔的多个网卡)
+if [ -n "${interface+x}" ]; then
+    if [ "$interface" == "all" ]; then
+        set -- "$@" "-a"
+    else
+        OLD_IFS="$IFS"; IFS=","
+        for item in $interface; do
+            set -- "$@" "-i" "$item"
+        done
+        IFS="$OLD_IFS"
+    fi
+fi
+
+# 解析 hostname (支持逗号分隔，同时添加 -h 和 -e)
+if [ -n "${hostname+x}" ]; then
+    OLD_IFS="$IFS"; IFS=","
+    for item in $hostname; do
+        set -- "$@" "-h" "$item" "-e" "$item"
+    done
+    IFS="$OLD_IFS"
+fi
+
+# 解析 payload (支持逗号分隔)
+if [ -n "${payload+x}" ]; then
+    OLD_IFS="$IFS"; IFS=","
+    for item in $payload; do
+        set -- "$@" "-b" "$item"
+    done
+    IFS="$OLD_IFS"
+fi
+
+# ----------------- 单值参数解析 -----------------
 [ -n "${mark+x}" ] && set -- "$@" "-m" "$mark"
 [ -n "${mask+x}" ] && set -- "$@" "-x" "$mask"
 [ -n "${number+x}" ] && set -- "$@" "-n" "$number"
 [ -n "${repeat+x}" ] && set -- "$@" "-r" "$repeat"
-[ -n "${payload+x}" ] && set -- "$@" "-b" "$payload"
 [ -n "${logfile+x}" ] && set -- "$@" "-w" "$logfile"
 [ -n "${silent+x}" ] && [ "$silent" -eq 1 ] && set -- "$@" "-s"
 [ -n "${ttl+x}" ] && set -- "$@" "-t" "$ttl"

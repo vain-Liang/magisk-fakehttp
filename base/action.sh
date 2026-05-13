@@ -40,9 +40,6 @@ load_config
 
 set -- -d -z
 
-# ----------------- 多值参数解析 -------------------
-
-# 解析 interface (支持 all 或 逗号分隔的多个网卡)
 if [ -n "${interface+x}" ]; then
     if [ "$interface" == "all" ]; then
         set -- "$@" "-a"
@@ -55,7 +52,6 @@ if [ -n "${interface+x}" ]; then
     fi
 fi
 
-# 解析 hostname (支持逗号分隔，同时添加 -h 和 -e)
 if [ -n "${hostname+x}" ]; then
     OLD_IFS="$IFS"; IFS=","
     for item in $hostname; do
@@ -64,7 +60,6 @@ if [ -n "${hostname+x}" ]; then
     IFS="$OLD_IFS"
 fi
 
-# 解析 payload (支持逗号分隔)
 if [ -n "${payload+x}" ]; then
     OLD_IFS="$IFS"; IFS=","
     for item in $payload; do
@@ -73,7 +68,6 @@ if [ -n "${payload+x}" ]; then
     IFS="$OLD_IFS"
 fi
 
-# ----------------- 单值参数解析 -----------------
 [ -n "${mark+x}" ] && set -- "$@" "-m" "$mark"
 [ -n "${mask+x}" ] && set -- "$@" "-x" "$mask"
 [ -n "${number+x}" ] && set -- "$@" "-n" "$number"
